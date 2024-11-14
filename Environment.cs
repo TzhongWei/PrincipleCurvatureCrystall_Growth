@@ -22,6 +22,7 @@ namespace PrincipalCurvatureCrystal_Growth
         {
             this.VibrationEnergy = InitialEnergy;
             this.Molecules = new Molecule[MoleculesCount];
+            this.Container = Container;
             var ActionDic = new Dictionary<string, Molecule.ThresholdSetting>();
             for (int i = 0; i < Actions.Count; i++)
                 ActionDic.Add(Actions[i].Name, Actions[i].ThresholdAction);
@@ -82,6 +83,7 @@ namespace PrincipalCurvatureCrystal_Growth
             }
 
             VibrationEnergy -= VibrationDeclineSpeed;
+            if (VibrationEnergy < 0) VibrationEnergy = 0;
             return true;
         }
         public IEnumerable<Point3d> GetDisplayGeometry()

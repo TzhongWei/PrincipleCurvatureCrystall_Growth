@@ -13,8 +13,8 @@ namespace PrincipalCurvatureCrystal_Growth.ThresholdAttribute
     {
         public override string Name { get => "PrincipleCurvatureAttribute";}
         public override string Description { get => "In this class the threshold can be used for crystallising points according to the principle curvature on a surface"; }
-        public double ConstantDistanceWeigth = 1.0;
-        public double ConstantNormalWeigth = 1.0;
+        public double ConstantDistanceWeigth = 0.1;
+        public double ConstantNormalWeigth = 100.0;
         internal double MoleculeNormalDotProduct(Molecule M1, Molecule M2)
         {
             var Srf = M1.environment.Container;
@@ -26,7 +26,7 @@ namespace PrincipalCurvatureCrystal_Growth.ThresholdAttribute
         {
             var DotVal = MoleculeNormalDotProduct(M1, M2);
             var DistVal = Utl.MoleculeDistance(M1, M2);
-            return Math.Pow(DotVal, 2) * ConstantNormalWeigth / Math.Pow(DistVal, 2) * ConstantDistanceWeigth;
+            return Math.Pow(DotVal, 2) * 100000 / Math.Pow(DistVal, 2) * ConstantDistanceWeigth;
         }
         public override void ThresholdAction(Molecule molecule)
         {
@@ -34,29 +34,32 @@ namespace PrincipalCurvatureCrystal_Growth.ThresholdAttribute
             var Env = molecule.environment;
             //This is the lowest cost for bondingEnergy
             var BestBondingEnergy = Env.VibrationEnergy;
-            bool IsLast = false;
-            int SelectedCrystalBranch = -1;
             Crystal SelectedCrystal = null;
             Molecule SelectedMolecule = null;
+            bool insertAtLastNode = false;
+            int SelectedCrystalBranch = -1;
+            
             foreach(Crystal CrystalPt in Env.crystals) 
             {
                 for(int i = 0; i < CrystalPt.LastNode.Length; i++)
                 {
                     var Node = CrystalPt.LastNode[i];
-                    var CurrentNodeBondingEnergy = BondingEnergyExpression(molecule, Node);
+
+                    //Compute bonding energy with the last node
+                    var BondingEnergy = BondingEnergyExpression(molecule, Node);
                     
-                    if (CurrentNodeBondingEnergy > BestBondingEnergy)
+                    if (BondingEnergy > BestBondingEnergy)
                     {
-                        BestBondingEnergy = CurrentNodeBondingEnergy;
+                        BestBondingEnergy = BondingEnergy;
                         SelectedCrystal = CrystalPt;
                         SelectedMolecule = Node; //This molecule will be the following node with the "Node"
                         SelectedCrystalBranch = i;
-                        IsLast = true;
+                        insertAtLastNode = true;
                     }
 
                     //Traverse the bonded nodes to find a better bonding opportunity
                     var FormerMolecule = Node.BondedNode;
-                    while (FormerMolecule != null)
+                    while (FormerMolecule != null && FormerMolecule.IsFixed)
                     {
                         var FormerAndCurrentBondingEnergy = BondingEnergyExpression(molecule, FormerMolecule);
 
@@ -66,10 +69,11 @@ namespace PrincipalCurvatureCrystal_Growth.ThresholdAttribute
                             SelectedCrystal = CrystalPt;
                             SelectedMolecule = FormerMolecule.BondedNode;
                             SelectedCrystalBranch = i;
-                            IsLast = false;
+                            insertAtLastNode = false;
                         }
 
                         FormerMolecule = FormerMolecule.BondedNode;
+                        break;
                     }
                 }
             }
@@ -77,11 +81,11 @@ namespace PrincipalCurvatureCrystal_Growth.ThresholdAttribute
             // If no suitable bonding energy found, skip this molecule
             if (BestBondingEnergy <= Env.VibrationEnergy) return;
 
-            if (IsLast)
+            if (insertAtLastNode)
             {
                 // If the crystal is full, skip the insertion
                 if (SelectedCrystal.IsFull)
-                    return;
+                    return; // The crystal is full; cannot add more molecules to this leg
                 else
                 {
                     // Insert the molecule at the last node

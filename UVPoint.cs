@@ -38,6 +38,7 @@ namespace PrincipalCurvatureCrystal_Growth
                 this.IsValid = false;
                 this.X = double.NaN;
                 this.Y = double.NaN;
+                return;
             }
             var UDom = Container.Domain(0);
             var VDom = Container.Domain(1);
