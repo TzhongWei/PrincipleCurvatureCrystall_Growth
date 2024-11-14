@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PrincipleCurvatureCrystal_Growth
+namespace PrincipalCurvatureCrystal_Growth
 {
     public class Crystal
     {
@@ -37,6 +37,6 @@ namespace PrincipleCurvatureCrystal_Growth
             }
             return Lines;
         }
-        public bool IsFull => FixMolecule.Count == this.CrystalSize;
+        public bool IsFull => FixMolecule.Count >= this.CrystalSize;
     }
 }

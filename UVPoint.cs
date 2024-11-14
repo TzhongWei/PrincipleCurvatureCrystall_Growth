@@ -9,9 +9,9 @@ using System.Security.AccessControl;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PrincipleCurvatureCrystal_Growth
+namespace PrincipalCurvatureCrystal_Growth
 {
-    public struct UVPoint
+    public class UVPoint
     {
         public bool IsValid { get; private set; }
         public double X;
@@ -41,7 +41,7 @@ namespace PrincipleCurvatureCrystal_Growth
             }
             var UDom = Container.Domain(0);
             var VDom = Container.Domain(1);
-            if (Utl.ContainsBond(UDom, y) && Utl.ContainsBond(VDom, y))
+            if (Utl.ContainsBond(UDom, x) && Utl.ContainsBond(VDom, y))
             {
                 this.X = x;
                 this.Y = y;

@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using PrincipleCurvatureCrystal_Growth.ThresholdAttribute;
+using PrincipalCurvatureCrystal_Growth.ThresholdAttribute;
 
-namespace PrincipleCurvatureCrystal_Growth
+namespace PrincipalCurvatureCrystal_Growth
 {
     public class Environment
     {
@@ -30,25 +30,30 @@ namespace PrincipleCurvatureCrystal_Growth
                 this.Molecules[i] = Molecule.CreateMolecule(this, ActionDic);
             }
         }
-        public HashSet<Crystal> crystals { get; private set; } = null;
+        public HashSet<Crystal> crystals { get; private set; } = new HashSet<Crystal>();
         public void SetStartCrystalPoints(int Count, int size = 40)
         {
-            if (this.crystals.Count > 0 || this.crystals == null)
+            if (this.crystals.Count > 0)
                 this.crystals = new HashSet<Crystal>();
             //Randomly Pick the count of the crystal point
-            for(int i = 0; i < Count; i++)
+            int retries = 0;
+            int MaxRetry = 20;
+            int i = 0;
+            while (i < Count && retries < MaxRetry)
             {
-                var Rand = new Random(DateTime.Now.Millisecond);
-                var Item = this.Molecules[Rand.Next(0, this.Molecules.Length)];
-                if(!crystals.Add(new Crystal(Item, size)))
+                
+                var Item = this.Molecules[Utl.Rand.Next(0, this.Molecules.Length)];
+                if (!crystals.Add(new Crystal(Item, size)))
                 {
-                    i--;
+                    retries++;
+                    continue;
                 }
+                i++;
             }
         }
         public void SetStartCrystalPoints(IEnumerable<Point3d> UVPoints, int size = 40)
         {
-            if(this.crystals.Count > 0 || this.crystals == null)
+            if(this.crystals.Count > 0)
                 this.crystals = new HashSet<Crystal>();
             var Threshold = Molecules[0].Threshold;
             for (int i = 0; i < UVPoints.Count(); i++)
@@ -69,11 +74,14 @@ namespace PrincipleCurvatureCrystal_Growth
             if(this.crystals.Count == 0) return false;
             foreach (var molecule in this.Molecules)
                 molecule.Execute();
+
             //Renew the list of molecules
             for (int i = 0; i < Molecules.Length; i++)
             {
-                this.Molecules[i] = Molecule.CreateMolecule(this, ActionDic);
+                this.Molecules[i] = Molecule.CreateMolecule(this, this.Molecules[i].Threshold);
             }
+
+            VibrationEnergy -= VibrationDeclineSpeed;
             return true;
         }
         public IEnumerable<Point3d> GetDisplayGeometry()

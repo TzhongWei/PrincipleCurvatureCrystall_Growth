@@ -6,10 +6,11 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PrincipleCurvatureCrystal_Growth
+namespace PrincipalCurvatureCrystal_Growth
 {
     internal static class Utl
     {
+        public static readonly Random Rand = new Random();
         internal static double MoleculeDistance(Molecule M1, Molecule M2)
         {
             var Srf = M1.environment.Container;
@@ -22,7 +23,7 @@ namespace PrincipleCurvatureCrystal_Growth
             double x = 0, y = 0;
             for(int i  = 0; i < 2; i++)
             {
-                var Rand = new Random(DateTime.Now.Millisecond);
+                //var Rand = new Random(DateTime.Now.Millisecond);
                 x = Rand.NextDouble();
                 y = Rand.NextDouble();
             }

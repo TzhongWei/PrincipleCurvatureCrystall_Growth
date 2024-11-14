@@ -7,7 +7,7 @@ using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PrincipleCurvatureCrystal_Growth.ThresholdAttribute
+namespace PrincipalCurvatureCrystal_Growth.ThresholdAttribute
 {
     public class PrincipleCurvatureAttribute : ThresholdAttributeBase
     {
@@ -33,7 +33,7 @@ namespace PrincipleCurvatureCrystal_Growth.ThresholdAttribute
 
             var Env = molecule.environment;
             //This is the lowest cost for bondingEnergy
-            var BondingEnergy = Env.VibrationEnergy;
+            var BestBondingEnergy = Env.VibrationEnergy;
             bool IsLast = false;
             int SelectedCrystalBranch = -1;
             Crystal SelectedCrystal = null;
@@ -44,62 +44,80 @@ namespace PrincipleCurvatureCrystal_Growth.ThresholdAttribute
                 {
                     var Node = CrystalPt.LastNode[i];
                     var CurrentNodeBondingEnergy = BondingEnergyExpression(molecule, Node);
-                    if (CurrentNodeBondingEnergy > BondingEnergy)
+                    
+                    if (CurrentNodeBondingEnergy > BestBondingEnergy)
                     {
-                        BondingEnergy = CurrentNodeBondingEnergy;
+                        BestBondingEnergy = CurrentNodeBondingEnergy;
                         SelectedCrystal = CrystalPt;
                         SelectedMolecule = Node; //This molecule will be the following node with the "Node"
                         SelectedCrystalBranch = i;
                         IsLast = true;
                     }
-                    if (Node.IsFixed)
+
+                    //Traverse the bonded nodes to find a better bonding opportunity
+                    var FormerMolecule = Node.BondedNode;
+                    while (FormerMolecule != null)
                     {
-                        var FormerMolecule = Node.BondedNode;
-                        while (FormerMolecule.IsFixed)
+                        var FormerAndCurrentBondingEnergy = BondingEnergyExpression(molecule, FormerMolecule);
+
+                        if (FormerAndCurrentBondingEnergy > BestBondingEnergy)
                         {
-                            var FormerBondingEnergy = FormerMolecule.BondingEnergy;
-                            var FormerAndCurrentBondingEnergy = BondingEnergyExpression(FormerMolecule, molecule);
-                            if( FormerAndCurrentBondingEnergy > FormerBondingEnergy && 
-                                FormerAndCurrentBondingEnergy > BondingEnergy)
-                            {
-                                BondingEnergy = FormerAndCurrentBondingEnergy;
-                                SelectedCrystal = CrystalPt;
-                                SelectedMolecule = FormerMolecule.BondedNode; //FormerMolecule is going to be replaced by current molecule
-                                SelectedCrystalBranch = i;
-                                IsLast = false;
-                            }
-                            FormerMolecule = FormerMolecule.BondedNode;
+                            BestBondingEnergy = FormerAndCurrentBondingEnergy;
+                            SelectedCrystal = CrystalPt;
+                            SelectedMolecule = FormerMolecule.BondedNode;
+                            SelectedCrystalBranch = i;
+                            IsLast = false;
                         }
+
+                        FormerMolecule = FormerMolecule.BondedNode;
                     }
                 }
             }
 
-            if (BondingEnergy == Env.VibrationEnergy) return;
-            if(IsLast && SelectedCrystal.IsFull)
-            { return; }
+            // If no suitable bonding energy found, skip this molecule
+            if (BestBondingEnergy <= Env.VibrationEnergy) return;
+
+            if (IsLast)
+            {
+                // If the crystal is full, skip the insertion
+                if (SelectedCrystal.IsFull)
+                    return;
+                else
+                {
+                    // Insert the molecule at the last node
+                    molecule.BondingEnergy = BestBondingEnergy;
+                    molecule.IsFixed = true;
+                    molecule.BondedNode = SelectedMolecule;
+                    SelectedMolecule.NextNode = molecule;
+                    SelectedCrystal.LastNode[SelectedCrystalBranch] = molecule;
+                    SelectedCrystal.FixMolecule.Add(molecule);
+                }
+            }
             else
             {
-                molecule.BondingEnergy = BondingEnergy;
+                // Insert the molecule and replace the original weaker node
+                molecule.BondingEnergy = BestBondingEnergy;
                 molecule.IsFixed = true;
                 molecule.BondedNode = SelectedMolecule;
-                SelectedCrystal.LastNode[SelectedCrystalBranch] = molecule;
-                //Release the original crystall path
-                if(SelectedMolecule.HasNextNode)
+                SelectedMolecule.NextNode = molecule;
+                SelectedCrystal.FixMolecule.Add(molecule);
+
+                // Clean the original node path
+                if (SelectedMolecule.HasNextNode)
                 {
                     var OriginalFollowingMolecule = SelectedMolecule.NextNode;
-                    SelectedCrystal.FixMolecule.Remove(OriginalFollowingMolecule);
-                    OriginalFollowingMolecule.IsFixed = false;
-                    OriginalFollowingMolecule.BondedNode = null;
-                    while(OriginalFollowingMolecule.HasNextNode)
+                    SelectedMolecule.NextNode = null;
+
+                    while (OriginalFollowingMolecule != null)
                     {
-                        OriginalFollowingMolecule = SelectedMolecule.NextNode;
+                        var Next = OriginalFollowingMolecule.NextNode;
                         SelectedCrystal.FixMolecule.Remove(OriginalFollowingMolecule);
                         OriginalFollowingMolecule.IsFixed = false;
                         OriginalFollowingMolecule.BondedNode = null;
+                        OriginalFollowingMolecule.NextNode = null;
+                        OriginalFollowingMolecule = Next;
                     }
                 }
-                SelectedMolecule.NextNode = molecule;
-                SelectedCrystal.FixMolecule.Add(molecule);
             }
         }
     }
