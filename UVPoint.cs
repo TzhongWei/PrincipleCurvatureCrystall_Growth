@@ -9,7 +9,7 @@ using System.Security.AccessControl;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PrincipleCurvatureCrystall_Growth
+namespace PrincipleCurvatureCrystal_Growth
 {
     public struct UVPoint
     {

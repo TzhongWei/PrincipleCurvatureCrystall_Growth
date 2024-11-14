@@ -3,9 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Security.Policy;
 
-namespace PrincipleCurvatureCrystall_Growth
+namespace PrincipleCurvatureCrystal_Growth
 {
     public class Molecule
     {
@@ -15,21 +16,25 @@ namespace PrincipleCurvatureCrystall_Growth
         public double BondingEnergy;
         public UVPoint Location { get; private set; }
         public Molecule BondedNode;
-        public Molecule NextNode;
+        //public Molecule NextNode;
         public delegate void ThresholdSetting(Molecule molecule);
-        private Dictionary<string, ThresholdSetting> Threshold;
-        public List<string> GetThreshold => Threshold.Keys.ToList();
+        public Dictionary<string, ThresholdSetting> Threshold { get; private set; }
         public static Molecule Unset => new Molecule();
         private Molecule() 
         {
             this.IsValid = false;
             this.IsFixed = false;
             this.BondedNode = null;
-            this.NextNode = null;
+            //this.NextNode = null;
             this.Location = UVPoint.Unset;
             this.Threshold = null;
         }
-        
+        public static Molecule CreateByUV(Environment environment, Point3d UVPt, Dictionary<string, ThresholdSetting> Threshold)
+        {
+            var Mole = Molecule.CreateMolecule(environment, Threshold);
+            Mole.Location = UVPoint.CreateByNormalised(UVPt.X, UVPt.Y, environment.Container);
+            return Mole;
+        }
         private Molecule(Environment environment, Dictionary<string, ThresholdSetting> Threshold)
         {
             this.IsValid = true;
@@ -38,7 +43,7 @@ namespace PrincipleCurvatureCrystall_Growth
             this.IsFixed = false;
             this.Location = Utl.RandomPoint(environment.Container);
             this.BondedNode = Molecule.Unset;
-            this.NextNode = Molecule.Unset;
+            //this.NextNode = Molecule.Unset;
             BondingEnergy = -1;
         }
         public void Execute()
@@ -56,7 +61,7 @@ namespace PrincipleCurvatureCrystall_Growth
                 this.Location.GetDisplayGeometry(Container),
                 this.BondedNode.Location.GetDisplayGeometry(Container)
                 ) : null;
-        public bool HasNextNode => this.NextNode.IsValid;
+        //public bool HasNextNode => this.NextNode.IsValid;
     }
 
 }

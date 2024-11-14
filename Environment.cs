@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using PrincipleCurvatureCrystall_Growth.ThresholdAttribute;
+using PrincipleCurvatureCrystal_Growth.ThresholdAttribute;
 
-namespace PrincipleCurvatureCrystall_Growth
+namespace PrincipleCurvatureCrystal_Growth
 {
     public class Environment
     {
@@ -30,9 +30,37 @@ namespace PrincipleCurvatureCrystall_Growth
                 this.Molecules[i] = Molecule.CreateMolecule(this, ActionDic);
             }
         }
-        public void SetStartCrystalPoints()
+        private HashSet<Crystal> crystals = null;
+        public void SetStartCrystalPoints(int Count, int size = 40)
         {
-
+            if (this.crystals.Count > 0 || this.crystals == null)
+                this.crystals = new HashSet<Crystal>();
+            //Randomly Pick the count of the crystal point
+            for(int i = 0; i < Count; i++)
+            {
+                var Rand = new Random(DateTime.Now.Millisecond);
+                var Item = this.Molecules[Rand.Next(0, this.Molecules.Length)];
+                if(!crystals.Add(new Crystal(Item, size)))
+                {
+                    i--;
+                }
+            }
+        }
+        public void SetStartCrystalPoints(IEnumerable<Point3d> UVPoints, int size = 40)
+        {
+            if(this.crystals.Count > 0 || this.crystals == null)
+                this.crystals = new HashSet<Crystal>();
+            var Threshold = Molecules[0].Threshold;
+            for (int i = 0; i < UVPoints.Count(); i++)
+            {
+                this.crystals.Add(
+                    new Crystal(
+                        Molecule.CreateByUV(
+                            this, UVPoints.ToList()[i], 
+                            Threshold),
+                        size)
+                    );
+            }
         }
         public bool IterationOfEnergy()
         {

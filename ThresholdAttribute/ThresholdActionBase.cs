@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PrincipleCurvatureCrystall_Growth.ThresholdAttribute
+namespace PrincipleCurvatureCrystal_Growth.ThresholdAttribute
 {
     public abstract class ThresholdAttributeBase
     {

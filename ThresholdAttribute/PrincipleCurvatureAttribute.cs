@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PrincipleCurvatureCrystall_Growth.ThresholdAttribute
+namespace PrincipleCurvatureCrystal_Growth.ThresholdAttribute
 {
     public class PrincipleCurvatureAttribute : ThresholdAttributeBase
     {
@@ -13,16 +13,8 @@ namespace PrincipleCurvatureCrystall_Growth.ThresholdAttribute
 
         public override void ThresholdAction(Molecule molecule)
         {
-            var Bonding = molecule.BondedNode;
             var CurrentLocation = molecule.Location;
-            if(Bonding.HasNextNode) //If the bounding contains the Nextnode, if has to compete for the bonding
-            {
-
-            }
-            else //current molecule can be the candidate to the crystall
-            {
-
-            }
+               
         }
     }
 }
