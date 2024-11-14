@@ -24,9 +24,26 @@ namespace PrincipalCurvatureCrystal_Growth
         //The Location of molecule in a container
         public UVPoint Location { get; private set; }
         //The first bonded molecule
-        public Molecule BondedNode { get; set; }
+        private Molecule bondedNode_;
+        public Molecule BondedNode { 
+            get { return bondedNode_; }
+            set { 
+            if(value.Location != this.Location)
+                {
+                    bondedNode_ = value;
+                }
+                else
+                    throw new Exception("push in same node");
+            } }
         //The second bonded molecule
-        public Molecule NextNode { get; set; }
+        private Molecule nextNode_;
+        public Molecule NextNode { get { return nextNode_; } 
+            set {
+                if (value.Location != this.Location)
+                    this.nextNode_ = value;
+                else
+                    throw new Exception("push in same node");
+            } }
         //A function to make the bonding between this molecule and other
         public delegate void ThresholdSetting(Molecule molecule);
         public Dictionary<string, ThresholdSetting> Threshold { get; private set; } = new Dictionary<string, ThresholdSetting>();
