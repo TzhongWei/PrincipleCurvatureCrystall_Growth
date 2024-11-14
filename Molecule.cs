@@ -1,4 +1,5 @@
 ﻿using Rhino.Geometry;
+using Rhino.UI.Theme;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
@@ -8,15 +9,24 @@ using System.Security.Policy;
 
 namespace PrincipleCurvatureCrystal_Growth
 {
+    //Each molecule has two hands only.
     public class Molecule
     {
+        //The environment
         public Environment environment;
+        //Represented the molecule has bondedNode
         public bool IsFixed;
+        //Represented the molecule data is set up
         public bool IsValid;
+        //The bondingEnergy with bondedNode and this Node
         public double BondingEnergy;
+        //The Location of molecule in a container
         public UVPoint Location { get; private set; }
+        //The first bonded molecule
         public Molecule BondedNode;
-        //public Molecule NextNode;
+        //The second bonded molecule
+        public Molecule NextNode;
+        //A function to make the bonding between this molecule and other
         public delegate void ThresholdSetting(Molecule molecule);
         public Dictionary<string, ThresholdSetting> Threshold { get; private set; }
         public static Molecule Unset => new Molecule();
@@ -25,7 +35,7 @@ namespace PrincipleCurvatureCrystal_Growth
             this.IsValid = false;
             this.IsFixed = false;
             this.BondedNode = null;
-            //this.NextNode = null;
+            this.NextNode = null;
             this.Location = UVPoint.Unset;
             this.Threshold = null;
         }
@@ -43,7 +53,7 @@ namespace PrincipleCurvatureCrystal_Growth
             this.IsFixed = false;
             this.Location = Utl.RandomPoint(environment.Container);
             this.BondedNode = Molecule.Unset;
-            //this.NextNode = Molecule.Unset;
+            this.NextNode = Molecule.Unset;
             BondingEnergy = -1;
         }
         public void Execute()
@@ -61,7 +71,7 @@ namespace PrincipleCurvatureCrystal_Growth
                 this.Location.GetDisplayGeometry(Container),
                 this.BondedNode.Location.GetDisplayGeometry(Container)
                 ) : null;
-        //public bool HasNextNode => this.NextNode.IsValid;
+        public bool HasNextNode => this.NextNode.IsValid;
     }
 
 }

@@ -49,12 +49,19 @@ namespace PrincipleCurvatureCrystal_Growth
             }
             else
             {
-                
+
                 this.IsValid = false;
                 this.X = double.NaN;
                 this.Y = double.NaN;
             }
         }
-        public Point3d GetDisplayGeometry(Surface Container) => Container.PointAt(this.X, this.Y);
+        public Point3d GetDisplayGeometry(Surface Container)
+            => Container.PointAt(this.X, this.Y);
+        public Vector3d GetCurvatureVector(Surface Container, int Direction)
+            => Container.CurvatureAt(X, Y).Direction(Direction);
+        public double GetCurvatureValue(Surface Container, int Direction)
+            => Container.CurvatureAt(X,Y).Kappa(Direction);
+        public Vector3d GetNormalFromSurface(Surface Container)
+            => Container.NormalAt(X, Y);
     }
 }

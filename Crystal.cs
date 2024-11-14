@@ -18,9 +18,10 @@ namespace PrincipleCurvatureCrystal_Growth
             this.CrystalSize = Size;
             this.LastNode = new Molecule[] { CentralCrystal, CentralCrystal, CentralCrystal, CentralCrystal };
             this.IsStopGrowth = false;
+            this.FixMolecule.Add(this.CentralCrystal);
         }
         public Molecule[] LastNode;
-        
+        public HashSet<Molecule> FixMolecule = new HashSet<Molecule>();
         public List<LineCurve> GetPath(Surface Container)
         {
             List<LineCurve> Lines = new List<LineCurve>();
@@ -36,5 +37,6 @@ namespace PrincipleCurvatureCrystal_Growth
             }
             return Lines;
         }
+        public bool IsFull => FixMolecule.Count == this.CrystalSize;
     }
 }

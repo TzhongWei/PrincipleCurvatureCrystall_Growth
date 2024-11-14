@@ -30,7 +30,7 @@ namespace PrincipleCurvatureCrystal_Growth
                 this.Molecules[i] = Molecule.CreateMolecule(this, ActionDic);
             }
         }
-        private HashSet<Crystal> crystals = null;
+        public HashSet<Crystal> crystals { get; private set; } = null;
         public void SetStartCrystalPoints(int Count, int size = 40)
         {
             if (this.crystals.Count > 0 || this.crystals == null)
@@ -62,11 +62,19 @@ namespace PrincipleCurvatureCrystal_Growth
                     );
             }
         }
-        public bool IterationOfEnergy()
+        public bool Run(double VibrationDeclineSpeed)
         {
             //if vibrationEnergy is zero representing the environment freezed, not things can move.
-            if (VibrationEnergy == 0) return true;
-            return false;
+            if (VibrationEnergy <= 0) return false;
+            if(this.crystals.Count == 0) return false;
+            foreach (var molecule in this.Molecules)
+                molecule.Execute();
+            //Renew the list of molecules
+            for (int i = 0; i < Molecules.Length; i++)
+            {
+                this.Molecules[i] = Molecule.CreateMolecule(this, ActionDic);
+            }
+            return true;
         }
         public IEnumerable<Point3d> GetDisplayGeometry()
         {

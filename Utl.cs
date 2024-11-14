@@ -10,6 +10,13 @@ namespace PrincipleCurvatureCrystal_Growth
 {
     internal static class Utl
     {
+        internal static double MoleculeDistance(Molecule M1, Molecule M2)
+        {
+            var Srf = M1.environment.Container;
+            var Pt1 = M1.Location.GetDisplayGeometry(Srf);
+            var Pt2 = M2.Location.GetDisplayGeometry(Srf);
+            return Pt1.DistanceTo(Pt2);
+        }
         internal static UVPoint RandomPoint(Surface Container)
         {
             double x = 0, y = 0;
